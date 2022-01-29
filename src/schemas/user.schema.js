@@ -17,3 +17,11 @@ module.exports.OnlineUpdateRequestSchema = {
     required: ["authToken", "online"],
     additionalProperties: false
 }
+module.exports.TokenVerifyRequestSchema = {
+    type: "object",
+    properties: {
+        authToken: { type: "string" }
+    },
+    required: ["authToken"],
+    additionalProperties: false
+}
