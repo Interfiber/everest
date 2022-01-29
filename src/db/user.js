@@ -1,9 +1,10 @@
 // Modules
 const { User } = require("../models/User");
 const userUtils = require("../utils/user"); 
+const instanceConfig = require("../config/instanceConfig");
 // Connect to the database
 const mongoose = require("mongoose");
-mongoose.connect('mongodb://localhost:27017/everest');
+mongoose.connect('mongodb://127.0.0.1:27017/everest');
 
 // Check if a user exists
 module.exports.userExists = async function (username) {
@@ -26,13 +27,20 @@ module.exports.getUser = async function (usrname){
 module.exports.createUser = async function (usrname, passwd){
     // Check if the instance owner has locked account signup
     if (instanceConfig.config.lockAccountSignup){
-        res.json({
-            messaged: "Account signups are locked",
-            user: null,
-            errorLog: "instanceConfig.config.lockAccountSignup = true",
-            error: true
-        }).status(401);
-        return;
+        return {
+            error: true,
+            errorLog: "Account signup is locked!",
+            authToken: null
+        }
+    }
+    // Check if the data is null
+    if (usrname.trim().length == 0 || passwd.trim().length == 0){
+        return {
+            error: true,
+            errorLog: "Empty username, or password",
+            httpStatus: 400,
+            authToken: null
+        }
     }
     // Check if user exists
     if (await this.userExists(usrname)){
@@ -40,6 +48,7 @@ module.exports.createUser = async function (usrname, passwd){
         return {
             error: true,
             errorLog: "Username already taken!",
+            httpStatus: 409,
             authToken: null
         };
     }
@@ -61,15 +70,44 @@ module.exports.createUser = async function (usrname, passwd){
     // save user object
     await userObject.save();
     return {
+        errorLog: null,
         error: false,
         authToken: authToken
     }
 }
 
 // Login a user
-module.exports.loginUser = function (username, password){
-    const user = this.getUser(username);
+module.exports.loginUser = async function (username, password){
+    if (instanceConfig.config.lockAccountLogin){
+        return {
+            error: true,
+            errorLog: "Account logins are locked",
+            httpStatus: 403,
+            authToken: null
+        };
+    }
+    const user = await this.getUser(username);
+    // Username is invalid
     if (user == null){
-     return false;
+        return {
+            error: true,
+            httpStatus: 401,
+            errorLog: "User does not exist",
+            authToken: null
+        };
+    }
+    // If the user exists, check the password with the one in the database with the one given by the user
+    const passwordCheckResult = await userUtils.checkHashedPassword(user.password, password);
+    if (passwordCheckResult){
+        // If correct return the user auth token for the user
+        return user.authToken;
+    } else {
+        // If not return a message
+        return {
+            error: true,
+            httpStatus: 401,
+            errorLog: "User does not exist",
+            authToken: null
+        };
     }
 }

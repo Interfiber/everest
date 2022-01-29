@@ -15,3 +15,7 @@ module.exports.hashPassword = async function (input){
 module.exports.genAuthToken = function (){
     return nanoid.nanoid(AUTH_TOKEN_LENGTH);
 }
+module.exports.checkHashedPassword = async function (hashed, raw){
+    const checkResult = await bcrypt.compare(raw, hashed);
+    return checkResult;
+}

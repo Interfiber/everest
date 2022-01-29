@@ -1,5 +1,10 @@
-const joi = require("joi");
-module.exports.UserRequestSchema = joi.object({
-    username: String,
-    password: String
-})
+const Ajv = require("ajv")
+module.exports.UserRequestSchema = {
+    type: "object",
+    properties: {
+        username: { type: "string" },
+        password: { type: "string" }
+    },
+    required: ["username", "password"],
+    additionalProperties: false
+};

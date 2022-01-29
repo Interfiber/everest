@@ -18,9 +18,20 @@
     </div>
     <noscript>Everest chat requires javascript to function, please enable it!</noscript>
     <br>
-    <h1>⛰️ Everest Chat</h1>
+    <h1>⛰️ Everest Chat Signup</h1>
     <br>
-    <button class="btn" onclick="window.location.href = '/signup'">Sign up</button>
-    <button class="btn">Log in</button>
+    <div class="flash mt-3 flash-error alertbox" style="display: none;">
+        <p class="signupError">Failed to signup:</p>
+    </div>
+    <br>
+    <input type="text" class="form-control usernameInput" placeholder="Username">
+    <p></p>
+    <input type="password" class="form-control passwordInput" placeholder="Password">
+    <br>
+    <br>
+    <p>By signing up you agree to the <a href="/privacy.html">privacy policy</a>, and <a href="/terms.html">terms of service</a></p>
+    <p></p>
+    <button class="btn" onclick="signup()">Confirm</button>
+    <script src="/js/common.js" async></script>
 </body>
 </html>
