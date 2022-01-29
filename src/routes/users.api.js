@@ -1,9 +1,10 @@
 const express = require('express');
-const { UserRequestSchema } = require("../schemas/user.schema");
+const { UserRequestSchema, OnlineUpdateRequestSchema } = require("../schemas/user.schema");
 const userDatbase = require("../db/user");
 const { validate } = require("../utils/schema");
+const authMiddlewares = require("../middlewares/auth.middleware");
 const router = express.Router();
-
+router.use("/setonline", authMiddlewares.authTokenMiddleware);
 // Create user route
 router.post("/create", async (req, res) => {
     const validateStatus = validate(UserRequestSchema, req.body);
@@ -61,6 +62,23 @@ router.post("/login", async (req, res) => {
             authToken: user
         })
     }
+});
+// Set the online status of a user
+// Note: This route is protected by the auth middleware.
+router.post("/setonline", async (req, res) => {
+    const validateStatus = validate(OnlineUpdateRequestSchema, req.body);
+    if (!validateStatus){
+        res.json({
+            message: "Malformed request",
+            user: null,
+            error: true
+        }).status(400);
+        return;
+    }
+    // We know this will not be null because the middleware succeeded finding the token owner
+    const tokenOwner = await userDatbase.authTokenInfo(req.body.authToken);
+    const result = await userDatbase.updateUserOnline(tokenOwner.username, req.body.online);
+    res.json(result);
 });
 
 module.exports = router;

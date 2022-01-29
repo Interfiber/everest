@@ -33,7 +33,7 @@ module.exports.createUser = async function (usrname, passwd){
             authToken: null
         }
     }
-    // Check if the data is null
+    // Check if the data is empty
     if (usrname.trim().length == 0 || passwd.trim().length == 0){
         return {
             error: true,
@@ -86,13 +86,22 @@ module.exports.loginUser = async function (username, password){
             authToken: null
         };
     }
+     // Check if the data is empty
+     if (username.trim().length == 0 || password.trim().length == 0){
+        return {
+            error: true,
+            errorLog: "Empty username, or password",
+            httpStatus: 400,
+            authToken: null
+        }
+    }
     const user = await this.getUser(username);
     // Username is invalid
     if (user == null){
         return {
             error: true,
             httpStatus: 401,
-            errorLog: "User does not exist",
+            errorLog: "Username or password is incorrect",
             authToken: null
         };
     }
@@ -106,8 +115,44 @@ module.exports.loginUser = async function (username, password){
         return {
             error: true,
             httpStatus: 401,
-            errorLog: "User does not exist",
+            errorLog: "Username or password is incorrect",
             authToken: null
         };
     }
+}
+// Get auth token info
+module.exports.authTokenInfo = async function (token){
+    const tokenUser = await mongoose.model("User").findOne({ authToken: token }).exec();
+    return tokenUser;
+}
+
+// Check if an auth token is valid(wrapper around the authTokenInfo)
+module.exports.authTokenExists = async function (token){
+    const tokenOwner = await this.authTokenInfo(token);
+    if (tokenOwner == null){
+        return false;
+    } else {
+        return true;
+    }
+}
+
+
+// Update user online status
+module.exports.updateUserOnline = async function (username, online){
+    if (!this.userExists(username)){
+        return {
+            errorLog: "User does not exist",
+            error: true,
+            updated: false,
+            httpStatus: 404
+        };
+    }
+    const user = await this.getUser(username);
+    user.online = online;
+    await user.save();
+    return {
+        errorLog: null,
+        error: false,
+        updated: true
+    };
 }

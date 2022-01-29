@@ -9,9 +9,6 @@ const userSchema = new mongoose.Schema({
     avatarUrl: String,
     bannerUrl: String
 });
-// userScheme methods
-userSchema.methods.setOnlineStatus = function (status){
-    this.online = status;
-}
+
 
 module.exports.User = mongoose.model("User", userSchema);
