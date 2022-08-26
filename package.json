@@ -13,7 +13,7 @@
     "bcrypt": "^5.0.1",
     "express": "^4.17.2",
     "express-rate-limit": "^6.2.0",
-    "mongoose": "^6.1.8",
+    "mongoose": "^6.4.6",
     "nanoid": "^3.2.0",
     "nodemon": "^2.0.15",
     "socket.io": "^4.4.1"
